@@ -20,6 +20,7 @@ import {
 } from "@bitwarden/common/spec";
 import { CipherId, UserId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { RevealedCipherService } from "@bitwarden/common/vault/abstractions/revealed-cipher.service";
 import { SearchService } from "@bitwarden/common/vault/abstractions/search.service";
 import { VaultSettingsService } from "@bitwarden/common/vault/abstractions/vault-settings/vault-settings.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
@@ -79,12 +80,17 @@ describe("VaultPopupItemsService", () => {
   const userId = Utils.newGuid() as UserId;
   const accountServiceMock = mockAccountServiceWith(userId);
 
+  const revealedCipherService = mock<RevealedCipherService>();
+  let revealed$: BehaviorSubject<ReadonlyMap<CipherId, CipherView>>;
+
   const restrictedItemTypesService = {
     restricted$: new BehaviorSubject<RestrictedCipherType[]>([]),
     isCipherRestricted: jest.fn().mockReturnValue(false),
   };
 
   beforeEach(() => {
+    revealed$ = new BehaviorSubject<ReadonlyMap<CipherId, CipherView>>(new Map());
+    revealedCipherService.revealed$.mockReturnValue(revealed$);
     allCiphers = cipherFactory(10);
     const cipherList = Object.values(allCiphers);
     // First 2 ciphers are autofill
@@ -172,6 +178,7 @@ describe("VaultPopupItemsService", () => {
 
     testBed = TestBed.configureTestingModule({
       providers: [
+        { provide: RevealedCipherService, useValue: revealedCipherService },
         { provide: CipherService, useValue: cipherServiceMock },
         { provide: VaultSettingsService, useValue: vaultSettingsServiceMock },
         { provide: SearchService, useValue: searchService },
@@ -370,6 +377,55 @@ describe("VaultPopupItemsService", () => {
         expect(ciphers.length).toBe(3);
         done();
       });
+    });
+  });
+
+  describe("restricted ciphers", () => {
+    const restrictedRow = () =>
+      Object.assign(new CipherView(), { id: "restricted" as CipherId, partial: true });
+
+    beforeEach(() => {
+      searchService.searchCiphers.mockImplementation(
+        async (_userId, _filter, _text, ciphers) => ciphers,
+      );
+    });
+
+    it("lists restricted ciphers", async () => {
+      cipherServiceMock.cipherListViewsIncludingRestricted$.mockReturnValue(of([restrictedRow()]));
+      ciphersSubject.next({});
+
+      const ciphers = await firstValueFrom(service.filteredCiphers$);
+
+      expect(ciphers.map((c) => c.id)).toEqual(["restricted"]);
+      expect(cipherServiceMock.cipherListViewsIncludingRestricted$).toHaveBeenCalled();
+      expect(cipherServiceMock.cipherListViews$).not.toHaveBeenCalled();
+    });
+
+    it("swaps the revealed view in for its restricted row, keeping the row's organization", async () => {
+      const row = Object.assign(restrictedRow(), { organizationId: "org1" });
+      const revealed = Object.assign(new CipherView(), { id: "restricted" as CipherId });
+      cipherServiceMock.cipherListViewsIncludingRestricted$.mockReturnValue(of([row]));
+      revealed$.next(new Map([["restricted" as CipherId, revealed]]));
+      ciphersSubject.next({});
+
+      const [shown] = await firstValueFrom(service.filteredCiphers$);
+
+      expect(shown).toBe(revealed);
+      expect(shown.organization).toEqual(mockOrg);
+    });
+
+    it("leaves restricted ciphers out of the trash", async () => {
+      const deletedRow = Object.assign(restrictedRow(), { deletedDate: new Date() });
+      const deleted = Object.assign(new CipherView(), { deletedDate: new Date() });
+      cipherServiceMock.cipherListViewsIncludingRestricted$.mockReturnValue(
+        of([deletedRow, deleted]),
+      );
+      ciphersSubject.next({});
+
+      const deletedCiphers = await firstValueFrom(service.deletedCiphers$);
+
+      expect(deletedCiphers).toHaveLength(1);
+      expect(deletedCiphers[0].id).not.toBe("restricted");
     });
   });
 

@@ -2,7 +2,7 @@ import { ComponentFixture, fakeAsync, flush, TestBed, tick } from "@angular/core
 import { By } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import { mock } from "jest-mock-extended";
-import { BehaviorSubject, of, Subject } from "rxjs";
+import { BehaviorSubject, firstValueFrom, of, Subject } from "rxjs";
 
 import { CollectionService } from "@bitwarden/admin-console/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -39,6 +39,7 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { CipherAuthorizationService } from "@bitwarden/common/vault/services/cipher-authorization.service";
 import { TaskService } from "@bitwarden/common/vault/tasks";
+import { RestrictedCipherAction } from "@bitwarden/common/vault/utils/restricted-cipher-policy";
 import { DialogService, ToastService } from "@bitwarden/components";
 import { ShareLinkService } from "@bitwarden/tools-share";
 import {
@@ -113,20 +114,26 @@ describe("ViewComponent", () => {
   const mockUserId = Utils.newGuid() as UserId;
   const accountService: FakeAccountService = mockAccountServiceWith(mockUserId);
 
-  const displayView$ = jest.fn((_userId: UserId, stored: CipherView) => of(stored));
-
   const mockCipherService = {
-    getAllDecryptedForIdsIncludingRestricted: jest.fn().mockResolvedValue([mockCipher]),
+    cipherViews$: jest.fn().mockImplementation((userId) => of([mockCipher])),
+    // Reads through `cipherViews$`, so each test's `cipherViews$` override still applies.
+    getAllDecryptedForIdsIncludingRestricted: jest
+      .fn()
+      .mockImplementation(async (userId: UserId, ids: string[]) => {
+        const ciphers: CipherView[] = await firstValueFrom(mockCipherService.cipherViews$(userId));
+        return ciphers.filter((c) => ids.includes(c.id));
+      }),
     deleteWithServer: jest.fn().mockResolvedValue(undefined),
     softDeleteWithServer: jest.fn().mockResolvedValue(undefined),
   };
 
   const cipherArchiveService = mock<CipherArchiveService>();
+  const revealedCipherService = mock<RevealedCipherService>();
 
   beforeEach(async () => {
     mockCipherService.getAllDecryptedForIdsIncludingRestricted.mockClear();
-    displayView$.mockClear();
-    displayView$.mockImplementation((_userId, stored) => of(stored));
+    revealedCipherService.displayView$.mockImplementation((_userId, stored) => of(stored));
+    mockCipherService.cipherViews$.mockClear();
     mockCipherService.deleteWithServer.mockClear();
     mockCipherService.softDeleteWithServer.mockClear();
     mockNavigate.mockClear();
@@ -148,8 +155,8 @@ describe("ViewComponent", () => {
       imports: [ViewComponent],
       providers: [
         { provide: Router, useValue: { navigate: mockNavigate } },
+        { provide: RevealedCipherService, useValue: revealedCipherService },
         { provide: CipherService, useValue: mockCipherService },
-        { provide: RevealedCipherService, useValue: { displayView$ } },
         { provide: LogService, useValue: mock<LogService>() },
         {
           provide: VaultSettingsService,
@@ -293,7 +300,7 @@ describe("ViewComponent", () => {
       expect(buttons.some((b) => b.textContent?.trim() === "edit")).toBe(true);
     }));
 
-    it("offers no Edit on a PAM-gated partial cipher", fakeAsync(() => {
+    it("shows Edit disabled on a PAM-gated partial cipher", fakeAsync(() => {
       mockCipherService.getAllDecryptedForIdsIncludingRestricted.mockResolvedValueOnce([
         { ...mockCipher, partial: true },
       ]);
@@ -303,8 +310,11 @@ describe("ViewComponent", () => {
       fixture.detectChanges();
 
       expect(component.cipher.partial).toBe(true);
-      const buttons = Array.from(fixture.nativeElement.querySelectorAll("button")) as HTMLElement[];
-      expect(buttons.some((b) => b.textContent?.trim() === "edit")).toBe(false);
+      const disabledEdit = fixture.nativeElement.querySelector(
+        '[data-testid="edit-disabled-restricted"]',
+      ) as HTMLButtonElement | null;
+      expect(disabledEdit).not.toBeNull();
+      expect(disabledEdit?.disabled).toBe(true);
     }));
 
     it("shows the revealed view in place of the restricted copy while access is live", fakeAsync(() => {
@@ -314,12 +324,12 @@ describe("ViewComponent", () => {
         restricted,
       ]);
       const shown$ = new BehaviorSubject<CipherView>(revealed);
-      displayView$.mockReturnValue(shown$);
+      revealedCipherService.displayView$.mockReturnValue(shown$);
       params$.next({ cipherId: "122-333-444" });
 
       flush();
 
-      expect(displayView$).toHaveBeenCalledWith(mockUserId, restricted);
+      expect(revealedCipherService.displayView$).toHaveBeenCalledWith(mockUserId, restricted);
       expect(component.cipher).toBe(revealed);
 
       shown$.next(restricted);
@@ -330,7 +340,7 @@ describe("ViewComponent", () => {
 
     it("records one view of the item across a reveal and a re-lock", fakeAsync(() => {
       const shown$ = new BehaviorSubject<CipherView>(mockCipher as CipherView);
-      displayView$.mockReturnValue(shown$);
+      revealedCipherService.displayView$.mockReturnValue(shown$);
       params$.next({ cipherId: "122-333-444" });
       flush();
       shown$.next({ ...mockCipher, partial: true } as CipherView);
@@ -541,6 +551,72 @@ describe("ViewComponent", () => {
       expect(doAutofill).toHaveBeenCalledTimes(1);
       expect(focusSpy).toHaveBeenCalledWith(99);
       expect(closeSpy).toHaveBeenCalledTimes(1);
+    }));
+  });
+
+  describe("restricted ciphers", () => {
+    const stored = { ...mockCipher, partial: true } as CipherView;
+    const revealed = { ...mockCipher, partial: false, edit: true } as CipherView;
+    let display$: BehaviorSubject<CipherView>;
+
+    beforeEach(() => {
+      display$ = new BehaviorSubject<CipherView>(revealed);
+      mockCipherService.cipherViews$.mockImplementation(() => of([stored]));
+    });
+
+    afterEach(() => {
+      mockCipherService.cipherViews$.mockImplementation(() => of([mockCipher]));
+    });
+
+    it("shows the revealed view and allows edit, but not share, clone, or delete", fakeAsync(() => {
+      revealedCipherService.displayView$.mockReturnValue(display$);
+
+      params$.next({ cipherId: mockCipher.id });
+      flush();
+
+      expect(component.cipher).toBe(revealed);
+      expect(component["allows"](RestrictedCipherAction.Edit)).toBe(true);
+      expect(component["allows"](RestrictedCipherAction.Share)).toBe(false);
+      expect(component["allows"](RestrictedCipherAction.Clone)).toBe(false);
+      expect(component["allows"](RestrictedCipherAction.Delete)).toBe(false);
+      expect(component.showAutofillButton()).toBe(true);
+    }));
+
+    it("shows a restricted cipher without a revealed view read-only, with nothing to fill", fakeAsync(() => {
+      params$.next({ cipherId: mockCipher.id });
+      flush();
+
+      expect(component.cipher).toEqual(stored);
+      expect(component["allows"](RestrictedCipherAction.Edit)).toBe(false);
+      expect(component["allows"](RestrictedCipherAction.UserFields)).toBe(true);
+      expect(component.showAutofillButton()).toBe(false);
+    }));
+
+    it("shows a disabled Edit button, not a live one, while the restricted cipher is not revealed", fakeAsync(() => {
+      params$.next({ cipherId: mockCipher.id });
+      flush();
+      fixture.detectChanges();
+
+      const disabled = fixture.debugElement.query(
+        By.css("[data-testid='edit-disabled-restricted']"),
+      );
+      expect(disabled).toBeTruthy();
+      expect(
+        disabled.nativeElement.disabled || disabled.nativeElement.getAttribute("aria-disabled"),
+      ).toBeTruthy();
+    }));
+
+    it("falls back to the stored view in place when the reveal ends", fakeAsync(() => {
+      revealedCipherService.displayView$.mockReturnValue(display$);
+      params$.next({ cipherId: mockCipher.id });
+      flush();
+
+      display$.next(stored);
+      flush();
+
+      expect(component.cipher).toEqual(stored);
+      expect(component["allows"](RestrictedCipherAction.Edit)).toBe(false);
+      expect(collect).toHaveBeenCalledTimes(1);
     }));
   });
 
