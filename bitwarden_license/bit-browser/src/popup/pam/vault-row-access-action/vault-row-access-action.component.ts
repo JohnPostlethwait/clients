@@ -21,6 +21,7 @@ import {
   cipherAccessBadgeState,
   unactivatedApprovedRequest,
 } from "@bitwarden/bit-common/pam";
+import { AccessStateBadgeComponent } from "@bitwarden/bit-common/pam/access-state-badge/access-state-badge.component";
 import {
   callerOrganizations$,
   unlicensedForPam,
@@ -38,7 +39,6 @@ import {
 import { ChipActionComponent, DialogService, ToastService } from "@bitwarden/components";
 import { I18nPipe } from "@bitwarden/ui-common";
 
-import { AccessStateBadgeComponent } from "../access-state-badge/access-state-badge.component";
 import { RequestAccessDialogComponent } from "../request-access-dialog/request-access-dialog.component";
 import { VaultRowAccessStateService } from "../vault-row-access-state/vault-row-access-state.service";
 

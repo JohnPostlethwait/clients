@@ -196,6 +196,14 @@ export class ItemMoreOptionsComponent {
     return CipherViewLikeUtils.isRestricted(this.cipher);
   }
 
+  /**
+   * True for a restricted item with no live revealed view: only the view option remains. While a
+   * reveal is live, the restricted-cipher policy decides each action instead.
+   */
+  protected get isLocked() {
+    return this.isPartial && this.revealedView() == null;
+  }
+
   get canEdit() {
     return this.cipher.edit && this.allows(RestrictedCipherAction.Edit);
   }

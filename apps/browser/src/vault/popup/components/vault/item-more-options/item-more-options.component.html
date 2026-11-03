@@ -1,5 +1,5 @@
 <bit-item-action>
-  @if (!isPartial || showViewOption()) {
+  @if (!isLocked || showViewOption()) {
     <button
       type="button"
       bitIconButton="bwi-ellipsis-v"
@@ -20,18 +20,18 @@
           {{ "view" | i18n }}
         </button>
       }
-      @if (!isPartial) {
+      @if (!isLocked) {
         <button type="button" bitMenuItem (click)="toggleFavorite()">
           {{ favoriteText | i18n }}
         </button>
       }
-      @if (canEdit && !isPartial) {
+      @if (canEdit) {
         <button type="button" bitMenuItem (click)="edit()">
           {{ "edit" | i18n }}
         </button>
       }
-      @if (canEdit && canViewPassword && !isPartial) {
-        @if (canClone$ | async) {
+      @if (canEdit && canViewPassword) {
+        @if ((canClone$ | async) && allows(RestrictedCipherAction.Clone)) {
           <a bitMenuItem (click)="clone()">
             {{ "clone" | i18n }}
           </a>
@@ -42,7 +42,7 @@
           </a>
         }
       }
-      @if (!isPartial) {
+      @if (!isLocked) {
         @if (allows(RestrictedCipherAction.Share)) {
           <a bitMenuItem *appShareLinkMenuItem="cipher; let share = share" (click)="share()">
             {{ "shareViaLink" | i18n }}
@@ -69,7 +69,7 @@
         }
       }
     }
-    @if ((canDelete$ | async) && !isPartial) {
+    @if ((canDelete$ | async) && allows(RestrictedCipherAction.Delete)) {
       <button type="button" bitMenuItem variant="danger" (click)="delete()">
         {{ "delete" | i18n }}
       </button>

@@ -13,6 +13,7 @@ import { AccessRequestsSdkService } from "@bitwarden/bit-common/pam/services/acc
 import { DefaultLeasingErrorService } from "@bitwarden/bit-common/pam/services/default-leasing-error.service";
 import { MyLeasesService } from "@bitwarden/bit-common/pam/services/my-leases.service";
 import { FillCipherPolicy } from "@bitwarden/browser/autofill/services/abstractions/fill-cipher-policy";
+import { VAULT_ROW_ACCESS_ACTION } from "@bitwarden/browser/vault/popup/components/vault/vault-list-items-container/vault-row-access-action.token";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -26,6 +27,7 @@ import { DialogService, ToastService } from "@bitwarden/components";
 import { SafeInjectionToken, SafeProvider, safeProvider } from "@bitwarden/ui-common";
 import { CIPHER_VIEW_BANNER, ITEM_DETAILS_BADGE } from "@bitwarden/vault";
 
+import { VaultRowAccessActionComponent } from "../../popup/pam/vault-row-access-action/vault-row-access-action.component";
 import { requestLeaseRefresh } from "../lease-messages";
 import { PamFillCipherPolicy } from "../pam-fill-cipher-policy";
 
@@ -104,6 +106,10 @@ export function providePam(): SafeProvider[] {
     safeProvider({
       provide: ITEM_DETAILS_BADGE,
       useValue: ItemDetailsStateBadgeComponent,
+    }),
+    safeProvider({
+      provide: VAULT_ROW_ACCESS_ACTION,
+      useValue: VaultRowAccessActionComponent,
     }),
   ];
 }

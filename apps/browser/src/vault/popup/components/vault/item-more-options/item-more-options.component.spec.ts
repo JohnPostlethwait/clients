@@ -420,6 +420,21 @@ describe("ItemMoreOptionsComponent", () => {
       expect(component["allows"](RestrictedCipherAction.UserFields)).toBe(true);
     });
 
+    it("keeps the row menu actions available while a reveal of its restricted cipher is live", () => {
+      const restricted = { ...baseCipher, partial: true } as CipherView;
+      component.cipher = restricted;
+      expect(component["isLocked"]).toBe(true);
+
+      revealed$.next(
+        new Map([["cipher-1" as CipherId, { ...baseCipher, partial: false } as CipherView]]),
+      );
+
+      expect(component["isLocked"]).toBe(false);
+      expect(component.canEdit).toBe(true);
+      expect(component["allows"](RestrictedCipherAction.Delete)).toBe(false);
+      expect(component["allows"](RestrictedCipherAction.Clone)).toBe(false);
+    });
+
     it("allows edit of a revealed view, but not share or assign collections", () => {
       const revealed = { ...baseCipher, partial: false } as CipherView;
       revealed$.next(new Map([["cipher-1" as CipherId, revealed]]));

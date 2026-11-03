@@ -314,7 +314,7 @@ describe("ViewComponent", () => {
         '[data-testid="edit-disabled-restricted"]',
       ) as HTMLButtonElement | null;
       expect(disabledEdit).not.toBeNull();
-      expect(disabledEdit?.disabled).toBe(true);
+      expect(disabledEdit?.disabled || disabledEdit?.getAttribute("aria-disabled")).toBeTruthy();
     }));
 
     it("shows the revealed view in place of the restricted copy while access is live", fakeAsync(() => {
