@@ -8823,7 +8823,7 @@
   "pamEndLeaseSuccess": {
     "message": "Access ended."
   },
-  "pamExtendLeaseButton": {
+  "pamExtendLeaseButtonV2": {
     "message": "Extend access"
   },
   "pamExtendLeaseDialogTitle": {
@@ -8877,7 +8877,7 @@
   "pamAccessBadgeEnded": {
     "message": "Session ended"
   },
-  "pamActiveLeaseBannerTitle": {
+  "pamActiveLeaseBannerTitleV2": {
     "message": "Access active • $DURATION$ left",
     "placeholders": {
       "duration": {
@@ -8886,7 +8886,7 @@
       }
     }
   },
-  "pamActiveLeaseBannerEndingSoonTitle": {
+  "pamActiveLeaseBannerEndingSoonTitleV2": {
     "message": "Ending soon • $DURATION$ left",
     "placeholders": {
       "duration": {
@@ -8926,7 +8926,7 @@
   "pamEndedBannerBody": {
     "message": "The lease for this credential expired. This credential will be rotated now that your access has ended."
   },
-  "pamApprovedRequestBannerHeading": {
+  "pamApprovedRequestBannerHeadingV2": {
     "message": "Ready to use"
   },
   "pamApprovedRequestBannerHint": {
@@ -8938,11 +8938,11 @@
   "pamRequestAccessBannerHeading": {
     "message": "You can request access"
   },
-  "pamUnlicensedBannerHeading": {
+  "pamUnlicensedBannerHeadingV2": {
     "message": "You need a Privileged Controls license to use this item",
     "description": "Heading of the message shown on a privileged item to a member who has no Privileged Controls license. 'Privileged Controls' is a product name and should not be translated."
   },
-  "pamUnlicensedBannerBody": {
+  "pamUnlicensedBannerBodyV2": {
     "message": "Ask your admin to activate your license.",
     "description": "Body of the message shown on a privileged item to a member who has no Privileged Controls license. 'Privileged Controls' is a product name and should not be translated."
   },
@@ -9004,7 +9004,7 @@
   "pendingStateCancelError": {
     "message": "Couldn't cancel the request."
   },
-  "requestAccessModalSubmit": {
+  "requestAccessModalSubmitV2": {
     "message": "Send request"
   },
   "requestAccessModalAutomaticDescription": {
@@ -9013,7 +9013,7 @@
   "requestAccessModalHumanDescription": {
     "message": "Pick a window and tell the approver why you need access. They'll review and decide."
   },
-  "requestAccessModalDuration": {
+  "requestAccessModalDurationV2": {
     "message": "How long do you need it?"
   },
   "requestAccessModalDurationHint": {
@@ -9100,19 +9100,19 @@
       }
     }
   },
-  "requestAccessModalReasonRequired": {
+  "requestAccessModalReasonRequiredV2": {
     "message": "Why do you need it?"
   },
-  "requestAccessModalReasonOptional": {
+  "requestAccessModalReasonOptionalV2": {
     "message": "Why do you need it?"
   },
-  "requestAccessModalReasonPlaceholder": {
+  "requestAccessModalReasonPlaceholderV2": {
     "message": "e.g., Quarterly audit — need to run a few read-only queries"
   },
-  "requestAccessModalAutomaticReasonHint": {
+  "requestAccessModalAutomaticReasonHintV2": {
     "message": "Visible to your approver and saved to the audit log."
   },
-  "requestAccessModalHumanReasonHint": {
+  "requestAccessModalHumanReasonHintV2": {
     "message": "Visible to your approver and saved to the audit log."
   },
   "requestAccessModalGenericError": {
@@ -9124,7 +9124,7 @@
   "requestAccessModalApprovedSuccess": {
     "message": "Access approved — select Start access to begin."
   },
-  "requestAccessModalRequestCreatedSuccess": {
+  "requestAccessModalRequestCreatedSuccessV2": {
     "message": "Access requested"
   }
 }

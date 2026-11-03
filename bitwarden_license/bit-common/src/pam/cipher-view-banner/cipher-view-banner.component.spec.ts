@@ -284,8 +284,8 @@ describe("CipherViewBannerComponent", () => {
       expect(
         query("[data-testid='cipher-view-banner-unlicensed'] bit-icon-tile bit-icon.bwi-key"),
       ).not.toBeNull();
-      expect(text()).toContain("pamUnlicensedBannerHeading");
-      expect(text()).toContain("pamUnlicensedBannerBody");
+      expect(text()).toContain("pamUnlicensedBannerHeadingV2");
+      expect(text()).toContain("pamUnlicensedBannerBodyV2");
       expect(text()).not.toContain("pamUnlicensedBannerRequestUnavailable");
     });
 
@@ -513,7 +513,7 @@ describe("CipherViewBannerComponent", () => {
       await create(gatedCipher());
 
       expect(query('[data-testid="cipher-view-banner-approved"]')).not.toBeNull();
-      expect(text()).toContain("pamApprovedRequestBannerHeading");
+      expect(text()).toContain("pamApprovedRequestBannerHeadingV2");
       expect(query('[data-testid="cipher-view-banner-approved-hint"]')?.textContent).toContain(
         "pamApprovedRequestBannerHint",
       );
@@ -553,7 +553,7 @@ describe("CipherViewBannerComponent", () => {
 
       await create(gatedCipher());
 
-      expect(text()).toContain("pamActiveLeaseBannerTitle 20 days");
+      expect(text()).toContain("pamActiveLeaseBannerTitleV2 20 days");
       expect(collapseSpace(query('[data-testid="active-lease-ends-at"]')?.textContent)).toBe(
         collapseSpace(
           `pamLeaseExpires ${formatDate(endsAt, "mediumDate", "en-US")} ${lowerTime(endsAt)}`,
@@ -569,7 +569,7 @@ describe("CipherViewBannerComponent", () => {
 
       await create(gatedCipher());
 
-      expect(text()).toContain("pamActiveLeaseBannerTitle 30 minutes");
+      expect(text()).toContain("pamActiveLeaseBannerTitleV2 30 minutes");
       expect(collapseSpace(query('[data-testid="active-lease-ends-at"]')?.textContent)).toBe(
         collapseSpace(`pamLeaseExpiresToday ${lowerTime(endsAt)}`),
       );
@@ -610,7 +610,7 @@ describe("CipherViewBannerComponent", () => {
       await activeLeaseEndingIn(4 * 60 * 1000);
 
       expect(query('[data-testid="active-lease-ending-soon"]')?.textContent?.trim()).toBe(
-        "pamActiveLeaseBannerEndingSoonTitle 4 minutes",
+        "pamActiveLeaseBannerEndingSoonTitleV2 4 minutes",
       );
       expect(query('[data-testid="active-lease-countdown"]')).toBeNull();
       expect(glyph("bwi-exclamation-triangle")).not.toBeNull();
@@ -634,7 +634,7 @@ describe("CipherViewBannerComponent", () => {
       await activeLeaseEndingIn(5 * 60 * 1000);
 
       expect(query('[data-testid="active-lease-ending-soon"]')?.textContent?.trim()).toBe(
-        "pamActiveLeaseBannerEndingSoonTitle 5 minutes",
+        "pamActiveLeaseBannerEndingSoonTitleV2 5 minutes",
       );
     });
 
@@ -642,7 +642,7 @@ describe("CipherViewBannerComponent", () => {
       await activeLeaseEndingIn(6 * 60 * 1000);
 
       expect(query('[data-testid="active-lease-countdown"]')?.textContent?.trim()).toBe(
-        "pamActiveLeaseBannerTitle 6 minutes",
+        "pamActiveLeaseBannerTitleV2 6 minutes",
       );
       expect(query('[data-testid="active-lease-ending-soon"]')).toBeNull();
       expect(glyph("bwi-unlock")).not.toBeNull();
@@ -901,7 +901,7 @@ describe("CipherViewBannerComponent", () => {
       fixture.detectChanges();
 
       expect(text()).toContain("requestAccessModalDurationHint");
-      expect(text()).toContain("requestAccessModalAutomaticReasonHint");
+      expect(text()).toContain("requestAccessModalAutomaticReasonHintV2");
       expect(query("#pam-cipher-view-banner_select_duration")?.hasAttribute("required")).toBe(true);
       expect(query("#pam-cipher-view-banner_button_automatic-reason-copy")).not.toBeNull();
     });
@@ -1125,7 +1125,7 @@ describe("CipherViewBannerComponent", () => {
 
       expect(
         reasonHint("#pam-cipher-view-banner_textarea_automatic-reason")?.textContent,
-      ).toContain("requestAccessModalAutomaticReasonHint");
+      ).toContain("requestAccessModalAutomaticReasonHintV2");
     });
 
     it("renders the human path's Reason field as a multi-line textarea", async () => {
@@ -1148,7 +1148,7 @@ describe("CipherViewBannerComponent", () => {
       fixture.detectChanges();
 
       expect(reasonHint("#pam-cipher-view-banner_textarea_human-reason")?.textContent).toContain(
-        "requestAccessModalHumanReasonHint",
+        "requestAccessModalHumanReasonHintV2",
       );
     });
 
@@ -1430,7 +1430,7 @@ describe("CipherViewBannerComponent", () => {
         fixture.detectChanges();
 
         expect(component["slotContention"]()).toBeNull();
-        expect(fixture.nativeElement.textContent).toContain("requestAccessModalDuration");
+        expect(fixture.nativeElement.textContent).toContain("requestAccessModalDurationV2");
       });
     });
   });

@@ -842,7 +842,7 @@ export class CipherViewBannerComponent implements OnInit {
         message: this.i18nService.t(
           result.approvalMode === "automatic"
             ? "requestAccessModalApprovedSuccess"
-            : "requestAccessModalRequestCreatedSuccess",
+            : "requestAccessModalRequestCreatedSuccessV2",
         ),
       });
       this.requestFormExpanded.set(false);
