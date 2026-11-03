@@ -1,16 +1,14 @@
 <bit-item-action>
-  @if (!isLocked || showViewOption()) {
-    <button
-      type="button"
-      bitIconButton="bwi-ellipsis-v"
-      size="small"
-      [label]="'moreOptionsLabelNoPlaceholder' | i18n"
-      [bitMenuTriggerFor]="moreOptions"
-    ></button>
-  }
+  <button
+    type="button"
+    bitIconButton="bwi-ellipsis-v"
+    size="small"
+    [label]="'moreOptionsLabelNoPlaceholder' | i18n"
+    [bitMenuTriggerFor]="moreOptions"
+  ></button>
   <bit-menu #moreOptions>
     @if (!decryptionFailure) {
-      @if (canAutofill && showAutofill() && !isPartial && autofillAllowed$ | async) {
+      @if (canAutofill && showAutofill() && autofillAllowed$ | async) {
         <button type="button" bitMenuItem (click)="doAutofill()">
           {{ "autofillVerb" | i18n }}
         </button>
@@ -20,11 +18,36 @@
           {{ "view" | i18n }}
         </button>
       }
-      @if (!isLocked) {
-        <button type="button" bitMenuItem (click)="toggleFavorite()">
-          {{ favoriteText | i18n }}
-        </button>
+      @if (accessStatus(); as status) {
+        @if (isLocked) {
+          @if (status.kind === "ready") {
+            <button type="button" bitMenuItem (click)="startAccess()">
+              {{ "pamStartLeaseButton" | i18n }}
+            </button>
+          } @else {
+            <button
+              type="button"
+              bitMenuItem
+              [disabled]="status.kind !== 'request'"
+              (click)="requestAccess()"
+            >
+              {{ "pamRequestAccessButton" | i18n }}
+            </button>
+          }
+        } @else if (status.kind === "active") {
+          @if (status.canExtend) {
+            <button type="button" bitMenuItem (click)="extendAccess()">
+              {{ "pamExtendAccessMenuItem" | i18n }}
+            </button>
+          }
+          <button type="button" bitMenuItem (click)="endAccess()">
+            {{ "pamEndLeaseButton" | i18n }}
+          </button>
+        }
       }
+      <button type="button" bitMenuItem (click)="toggleFavorite()">
+        {{ favoriteText | i18n }}
+      </button>
       @if (canEdit) {
         <button type="button" bitMenuItem (click)="edit()">
           {{ "edit" | i18n }}
@@ -42,34 +65,32 @@
           </a>
         }
       }
-      @if (!isLocked) {
-        @if (allows(RestrictedCipherAction.Share)) {
-          <a bitMenuItem *appShareLinkMenuItem="cipher; let share = share" (click)="share()">
-            {{ "shareViaLink" | i18n }}
-          </a>
-        }
-        @if (canArchive$ | async) {
-          <button type="button" bitMenuItem (click)="archive()">
+      @if (!isLocked && allows(RestrictedCipherAction.Share)) {
+        <a bitMenuItem *appShareLinkMenuItem="cipher; let share = share" (click)="share()">
+          {{ "shareViaLink" | i18n }}
+        </a>
+      }
+      @if (canArchive$ | async) {
+        <button type="button" bitMenuItem (click)="archive()">
+          {{ "archiveVerb" | i18n }}
+        </button>
+      } @else {
+        <button
+          type="button"
+          bitMenuItem
+          (click)="badge.promptForPremium($event)"
+          [attr.aria-label]="'upgradeToUseArchive' | i18n"
+        >
+          <div class="tw-flex tw-flex-nowrap tw-items-center tw-gap-2">
             {{ "archiveVerb" | i18n }}
-          </button>
-        } @else {
-          <button
-            type="button"
-            bitMenuItem
-            (click)="badge.promptForPremium($event)"
-            [attr.aria-label]="'upgradeToUseArchive' | i18n"
-          >
-            <div class="tw-flex tw-flex-nowrap tw-items-center tw-gap-2">
-              {{ "archiveVerb" | i18n }}
-              <div aria-hidden>
-                <app-premium-badge #badge></app-premium-badge>
-              </div>
+            <div aria-hidden>
+              <app-premium-badge #badge></app-premium-badge>
             </div>
-          </button>
-        }
+          </div>
+        </button>
       }
     }
-    @if ((canDelete$ | async) && allows(RestrictedCipherAction.Delete)) {
+    @if ((canDelete$ | async) && allows(RestrictedCipherAction.Delete) && !accessActive) {
       <button type="button" bitMenuItem variant="danger" (click)="delete()">
         {{ "delete" | i18n }}
       </button>

@@ -19206,7 +19206,7 @@
     "message": "Ready to use"
   },
   "pamApprovedRequestBannerHint": {
-    "message": "Copy credentials to get started"
+    "message": "Start access to reveal credentials."
   },
   "pamRequestAccessBannerBody": {
     "message": "Credentials are masked until access is granted."
@@ -19313,9 +19313,6 @@
   "requestAccessModalDurationHint": {
     "message": "You'll get a notification once approved. Your time only counts down once you start using this credential."
   },
-  "requestAccessModalDetailsHeading": {
-    "message": "Request details"
-  },
   "requestAccessModalStartDate": {
     "message": "Start date"
   },
@@ -19395,9 +19392,6 @@
     }
   },
   "requestAccessModalReasonRequiredV2": {
-    "message": "Why do you need it?"
-  },
-  "requestAccessModalReasonOptionalV2": {
     "message": "Why do you need it?"
   },
   "requestAccessModalReasonPlaceholderV2": {

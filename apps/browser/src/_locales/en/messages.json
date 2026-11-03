@@ -1432,9 +1432,6 @@
   "requestAccessModalDuration1d": {
     "message": "1 day"
   },
-  "requestAccessModalReasonOptional": {
-    "message": "Reason (optional)"
-  },
   "requestAccessModalReasonRequired": {
     "message": "Reason"
   },
@@ -9265,6 +9262,14 @@
   "pamRequestToUse": {
     "message": "Request to use"
   },
+  "pamUnavailableToRequest": {
+    "message": "Unavailable to request",
+    "description": "Subtitle of a vault row for a privileged item that cannot be requested right now, for example because another member holds it."
+  },
+  "pamExtendAccessMenuItem": {
+    "message": "Extend access",
+    "description": "Overflow menu action on a vault row that extends the member's active access to a privileged item."
+  },
   "pamEndedBannerHeading": {
     "message": "Your access has ended"
   },
@@ -9275,7 +9280,7 @@
     "message": "Ready to use"
   },
   "pamApprovedRequestBannerHint": {
-    "message": "Copy credentials to get started"
+    "message": "Start access to reveal credentials."
   },
   "pamRequestAccessBannerBody": {
     "message": "Credentials are masked until access is granted."
@@ -9364,9 +9369,6 @@
   "requestAccessModalDurationHint": {
     "message": "You'll get a notification once approved. Your time only counts down once you start using this credential."
   },
-  "requestAccessModalDetailsHeading": {
-    "message": "Request details"
-  },
   "requestAccessModalStartDate": {
     "message": "Start date"
   },
@@ -9448,11 +9450,8 @@
   "requestAccessModalReasonRequiredV2": {
     "message": "Why do you need it?"
   },
-  "requestAccessModalReasonOptionalV2": {
-    "message": "Why do you need it?"
-  },
   "requestAccessModalReasonPlaceholderV2": {
-    "message": "e.g., Quarterly audit — need to run a few read-only queries"
+    "message": "e.g., Quarterly audit, need to run a few read-only queries"
   },
   "requestAccessModalAutomaticReasonHintV2": {
     "message": "Visible to your approver and saved to the audit log."
@@ -9467,7 +9466,7 @@
     "message": "You already have active access to this item."
   },
   "requestAccessModalApprovedSuccess": {
-    "message": "Access approved — select Start access to begin."
+    "message": "Access approved. Select Start access to begin."
   },
   "requestAccessModalRequestCreatedSuccessV2": {
     "message": "Access requested"

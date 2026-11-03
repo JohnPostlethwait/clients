@@ -9,12 +9,9 @@ import {
   computed,
   EventEmitter,
   inject,
-  Inject,
   input,
-  Optional,
   Output,
   Signal,
-  Type,
   ViewChild,
 } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -63,8 +60,9 @@ import {
 import { PopupCipherViewLike } from "../../../views/popup-cipher.view";
 import { ItemCopyActionsComponent } from "../item-copy-action/item-copy-actions.component";
 import { ItemMoreOptionsComponent } from "../item-more-options/item-more-options.component";
-
-import { VAULT_ROW_ACCESS_ACTION } from "./vault-row-access-action.token";
+import { isGatedRow, revealedCipherIds } from "../vault-row-access/revealed-cipher-ids";
+import { VaultRowAccessIconComponent } from "../vault-row-access/vault-row-access-icon.component";
+import { VaultRowSubtitleComponent } from "../vault-row-access/vault-row-subtitle.component";
 
 @Component({
   imports: [
@@ -78,6 +76,8 @@ import { VAULT_ROW_ACCESS_ACTION } from "./vault-row-access-action.token";
     SectionHeaderComponent,
     ItemCopyActionsComponent,
     ItemMoreOptionsComponent,
+    VaultRowAccessIconComponent,
+    VaultRowSubtitleComponent,
     OrgIconDirective,
     ScrollingModule,
     DisclosureComponent,
@@ -237,10 +237,7 @@ export class VaultListItemsContainerComponent {
       const login = CipherViewLikeUtils.getLogin(cipher);
       const hasUsername = login?.username != null;
       // Use autofill title when autofill is the primary action
-      const key =
-        this.canAutofill() && !CipherViewLikeUtils.isRestricted(cipher)
-          ? "autofillTitle"
-          : "viewItemTitle";
+      const key = this.canAutofill() && !this.isGated(cipher) ? "autofillTitle" : "viewItemTitle";
       return hasUsername ? `${key}WithField` : key;
     };
   });
@@ -306,17 +303,19 @@ export class VaultListItemsContainerComponent {
     private router: Router,
     private dialogService: DialogService,
     private accountService: AccountService,
-    @Optional() @Inject(VAULT_ROW_ACCESS_ACTION) protected accessAction: Type<unknown> | null,
   ) {}
 
   onCipherSelect(cipher: PopupCipherViewLike) {
-    return this.canAutofill() && !CipherViewLikeUtils.isRestricted(cipher)
+    return this.canAutofill() && !this.isGated(cipher)
       ? this.doAutofill(cipher)
       : this.onViewCipher(cipher);
   }
 
-  protected showAccessAction(cipher: CipherViewLike): boolean {
-    return this.accessAction != null && CipherViewLikeUtils.isRestricted(cipher);
+  private readonly revealedIds = revealedCipherIds();
+
+  /** A restricted item with no live reveal: no credentials to launch, copy or fill. */
+  protected isGated(cipher: CipherViewLike): boolean {
+    return isGatedRow(cipher, this.revealedIds());
   }
 
   /**
@@ -324,11 +323,7 @@ export class VaultListItemsContainerComponent {
    */
   async launchCipher(cipher: CipherViewLike) {
     const launchURI = CipherViewLikeUtils.getLaunchUri(cipher);
-    if (
-      !CipherViewLikeUtils.canLaunch(cipher) ||
-      !launchURI ||
-      CipherViewLikeUtils.isRestricted(cipher)
-    ) {
+    if (!CipherViewLikeUtils.canLaunch(cipher) || !launchURI || this.isGated(cipher)) {
       return;
     }
 

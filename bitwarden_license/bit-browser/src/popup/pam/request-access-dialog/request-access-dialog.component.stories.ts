@@ -126,7 +126,6 @@ export default {
                 "Pick a window and tell the approver why you need access. They'll review and decide.",
               requestAccessModalHumanReasonHint:
                 "Approvers will see this reason when reviewing your request.",
-              requestAccessModalReasonOptional: "Reason (optional)",
               requestAccessModalReasonPlaceholder: "Why do you need this?",
               requestAccessModalReasonRequired: "Reason",
               requestAccessModalStart: "Start time",

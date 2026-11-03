@@ -579,18 +579,21 @@ describe("VaultPopupListTableComponent", () => {
     });
   });
 
-  describe("access action seam", () => {
+  describe("gated rows", () => {
     const gated = { id: "g", partial: true } as unknown as PopupCipherViewLike;
     const full = { id: "f" } as unknown as PopupCipherViewLike;
 
-    it("renders nothing in place of copy when no action is provided", () => {
-      expect(component["showAccessAction"](gated)).toBe(false);
+    it("treats a restricted row with no live reveal as gated", () => {
+      expect(component["isGated"](gated)).toBe(true);
+      expect(component["isGated"](full)).toBe(false);
     });
 
-    it("renders the provided action on gated rows only", () => {
-      Object.defineProperty(component, "accessAction", { value: class {} });
-      expect(component["showAccessAction"](gated)).toBe(true);
-      expect(component["showAccessAction"](full)).toBe(false);
+    it("does not launch a gated row", async () => {
+      const launch = jest.spyOn(component["listTableService"], "launchCipher");
+
+      await component.launchCipher(gated);
+
+      expect(launch).not.toHaveBeenCalled();
     });
   });
 

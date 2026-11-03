@@ -4,9 +4,11 @@ import { mock, MockProxy } from "jest-mock-extended";
 import { BehaviorSubject, firstValueFrom, map, of, Subject } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { OrganizationId } from "@bitwarden/common/types/guid";
+import { CipherId, OrganizationId } from "@bitwarden/common/types/guid";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { RevealedCipherService } from "@bitwarden/common/vault/abstractions/revealed-cipher.service";
 import { CipherType } from "@bitwarden/common/vault/enums";
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { SearchTextDebounceInterval } from "@bitwarden/common/vault/services/search.service";
 import { CipherViewLikeUtils } from "@bitwarden/common/vault/utils/cipher-view-like-utils";
 import { DialogService } from "@bitwarden/components";
@@ -45,6 +47,7 @@ describe("VaultPopupListTableService", () => {
   const applyFilter = jest.fn();
 
   const currentTabIsOnBlocklist$ = new BehaviorSubject<boolean>(false);
+  const revealed$ = new BehaviorSubject<ReadonlyMap<CipherId, CipherView>>(new Map());
   /** The chip selection, as the table's `filterValues` reports it. */
   const selectedFilters$ = new BehaviorSubject<{
     cipherType: CipherType | null;
@@ -70,6 +73,7 @@ describe("VaultPopupListTableService", () => {
     hasFilterApplied$.next(false);
     autofillAllowed$.next(true);
     currentTabIsOnBlocklist$.next(false);
+    revealed$.next(new Map());
     selectedFilters$.next({ cipherType: null, organization: [], collection: [], folder: [] });
     memberOrganizations$.next([]);
 
@@ -104,6 +108,7 @@ describe("VaultPopupListTableService", () => {
           useValue: { loading$: loading$.asObservable() },
         },
         { provide: CipherService, useValue: cipherService },
+        { provide: RevealedCipherService, useValue: { revealed$: () => revealed$.asObservable() } },
         { provide: AccountService, useValue: accountService },
         { provide: PasswordRepromptService, useValue: passwordRepromptService },
         { provide: DialogService, useValue: mock<DialogService>() },
@@ -501,6 +506,17 @@ describe("VaultPopupListTableService", () => {
           showAutofillInMenu: false,
           titleKey: expect.stringMatching(/^viewItemTitle/),
         });
+      });
+
+      it("restores fill, launch and the menu Autofill once its reveal is live", async () => {
+        currentTabIsOnBlocklist$.next(false);
+        revealed$.next(new Map([["gated" as CipherId, {} as CipherView]]));
+
+        expect(gatedAutofillRow()).toMatchObject({
+          primaryAutofill: true,
+          showFillOnHover: true,
+        });
+        expect(gatedAllItemsRow()).toMatchObject({ showLaunch: true, showAutofillInMenu: true });
       });
 
       it("never offers launch", async () => {

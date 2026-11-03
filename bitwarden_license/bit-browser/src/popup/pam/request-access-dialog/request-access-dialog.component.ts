@@ -138,7 +138,7 @@ export class RequestAccessDialogComponent implements OnInit {
 
   protected readonly automaticForm = this.formBuilder.nonNullable.group({
     durationSeconds: [DEFAULT_REQUEST_ACCESS_DURATION_SECONDS, Validators.required],
-    reason: [""],
+    reason: ["", [Validators.required, nonBlank]],
   });
 
   protected readonly humanForm = this.formBuilder.nonNullable.group({
@@ -291,7 +291,7 @@ export class RequestAccessDialogComponent implements OnInit {
       durationSeconds: Number(durationSeconds),
       start: undefined,
       end: undefined,
-      reason: reason.trim() || undefined,
+      reason: reason.trim(),
     };
   }
 

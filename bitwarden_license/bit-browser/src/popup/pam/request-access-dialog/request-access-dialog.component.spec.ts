@@ -248,7 +248,7 @@ describe("RequestAccessDialogComponent", () => {
   });
 
   describe("submitting a request", () => {
-    it("sends only a duration on the automatic path", async () => {
+    it("sends a duration and the trimmed reason on the automatic path", async () => {
       requestsApi.preCheck.mockResolvedValue(preCheck({ approvalMode: "automatic" }));
       requestsApi.submitAccessRequest.mockResolvedValue({
         approvalMode: "automatic",
@@ -256,15 +256,17 @@ describe("RequestAccessDialogComponent", () => {
       } as never);
       await create();
 
-      component["automaticForm"].patchValue({ durationSeconds: 1800, reason: "  " });
+      component["automaticForm"].patchValue({
+        durationSeconds: 1800,
+        reason: "  Quarterly audit ",
+      });
       await component["submit"]();
 
       expect(requestsApi.submitAccessRequest).toHaveBeenCalledWith("cipher-1", {
         durationSeconds: 1800,
         start: undefined,
         end: undefined,
-        // A blank reason is optional on this path and must not be sent as an empty string.
-        reason: undefined,
+        reason: "Quarterly audit",
       });
       expect(toastService.showToast).toHaveBeenCalledWith({
         variant: "success",
@@ -273,6 +275,26 @@ describe("RequestAccessDialogComponent", () => {
       expect(accessRefresh.notifyAccessChanged).toHaveBeenCalledWith("cipher-1");
       expect(dialogRef.close).toHaveBeenCalledWith("submitted");
     });
+
+    it.each(["", "   "])(
+      "blocks the automatic path and shows the required error for reason %j",
+      async (reason) => {
+        requestsApi.preCheck.mockResolvedValue(preCheck({ approvalMode: "automatic" }));
+        await create();
+
+        const textarea = query("#pam-request-access-dialog_textarea_automatic-reason");
+        expect(textarea?.hasAttribute("required")).toBe(true);
+
+        component["automaticForm"].patchValue({ reason });
+        await component["submit"]();
+        fixture.detectChanges();
+
+        expect(requestsApi.submitAccessRequest).not.toHaveBeenCalled();
+        expect(component["automaticForm"].controls.reason.touched).toBe(true);
+        const error = textarea?.closest("bit-form-field")?.querySelector("bit-error");
+        expect(error?.textContent).toContain("inputRequired");
+      },
+    );
 
     it("sends a window and reason on the human path", async () => {
       requestsApi.preCheck.mockResolvedValue(preCheck({ approvalMode: "human" }));
@@ -493,6 +515,7 @@ describe("RequestAccessDialogComponent", () => {
       leasingErrors.isLeasingError.mockReturnValue(true);
       requestsApi.submitAccessRequest.mockRejectedValue(error);
       await create();
+      component["automaticForm"].patchValue({ reason: "Quarterly audit" });
       await component["submit"]();
     }
 
