@@ -21,6 +21,9 @@ What lives here:
   per-client and stay in their own client.
 - `access-state-badge/access-badge-ticker.service.ts` — `AccessBadgeTickerService`, the shared
   clock (`ticks$`) the badges and lease-lapse re-reads run on.
+- `vault-filter-controlled-access/` — `ControlledAccessVaultFilterService` and
+  `controlledAccessItemFilter`, the "Controlled access" chip's options and per-row matches, bound as
+  `VAULT_ITEM_FILTER` by both the web vault and the extension popup.
 - `testing/decision-builders.ts` — spec builders.
 
 Anything Angular-component-shaped, routed, or reaching into `@bitwarden/web-vault/` is

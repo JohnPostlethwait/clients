@@ -124,10 +124,14 @@ of those paths, it means the `bit-common` copy.
   state groups: "Privileged" and "My requests" (`pending`/`ready`/`active`). The VFO1 vault
   table's multi-select chip (`stateOptions$`, `CONTROLLED_ACCESS_STATE_FILTERS`) offers one
   option per `AccessBadgeState.kind`, labelled like the badge it admits, so its counts match
-  the badges on screen; the table ORs the selected options itself. "Unavailable" matches
-  nothing until the SDK produces that kind. Each row's state is read once per row list and
+  the badges on screen; the table ORs the selected options itself. "Ending soon" splits the
+  active leases at `ENDING_SOON_THRESHOLD_MS`, so "In use" is the badge's "X left" and a lapsed lease is in
+  neither. "Unavailable" matches nothing until the SDK produces that kind. Each row's state is read once per row list and
   shared across options (`accessKinds$`), so the chip's counts don't multiply the reads. Add an
   option by appending to the matching list, not by branching in `narrow$`.
+  The service and the chip factory live in `bit-common/src/pam/vault-filter-controlled-access/` (the
+  files here are re-exports), because the extension popup binds the same `VAULT_ITEM_FILTER` in
+  `bit-browser`'s `provide-pam.ts`.
 - `access-state-badge/`, `vault-row-lease-badge/`, `item-details-state-badge/` — the one
   access-state pill, and the two hosts that render it: a vault row, and the open item's
   name row. Both re-read on `AccessRefreshService` so neither can contradict a mutation

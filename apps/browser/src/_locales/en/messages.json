@@ -9223,6 +9223,15 @@
   "pamAccessBadgeEnded": {
     "message": "Session ended"
   },
+  "controlledAccess": {
+    "message": "Controlled access"
+  },
+  "pamControlledAccessFilterActive": {
+    "message": "In use"
+  },
+  "pamControlledAccessFilterEndingSoon": {
+    "message": "Ending soon"
+  },
   "pamActiveLeaseBannerTitleV2": {
     "message": "Access active • $DURATION$ left",
     "placeholders": {

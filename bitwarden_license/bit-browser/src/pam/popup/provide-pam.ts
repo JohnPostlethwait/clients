@@ -12,6 +12,8 @@ import { AccessRequestCancelService } from "@bitwarden/bit-common/pam/services/a
 import { AccessRequestsSdkService } from "@bitwarden/bit-common/pam/services/access-requests-sdk.service";
 import { DefaultLeasingErrorService } from "@bitwarden/bit-common/pam/services/default-leasing-error.service";
 import { MyLeasesService } from "@bitwarden/bit-common/pam/services/my-leases.service";
+import { controlledAccessItemFilter } from "@bitwarden/bit-common/pam/vault-filter-controlled-access/controlled-access-item-filter";
+import { ControlledAccessVaultFilterService } from "@bitwarden/bit-common/pam/vault-filter-controlled-access/controlled-access-vault-filter.service";
 import { FillCipherPolicy } from "@bitwarden/browser/autofill/services/abstractions/fill-cipher-policy";
 import { VAULT_ROW_ACCESS } from "@bitwarden/browser/vault/popup/components/vault/vault-row-access/vault-row-access.token";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
@@ -25,7 +27,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { RevealedCipherService } from "@bitwarden/common/vault/abstractions/revealed-cipher.service";
 import { DialogService, ToastService } from "@bitwarden/components";
 import { SafeInjectionToken, SafeProvider, safeProvider } from "@bitwarden/ui-common";
-import { CIPHER_VIEW_BANNER, ITEM_DETAILS_BADGE } from "@bitwarden/vault";
+import { CIPHER_VIEW_BANNER, ITEM_DETAILS_BADGE, VAULT_ITEM_FILTER } from "@bitwarden/vault";
 
 import { BrowserVaultRowAccessService } from "../../popup/pam/vault-row-access/browser-vault-row-access.service";
 import { requestLeaseRefresh } from "../lease-messages";
@@ -106,6 +108,17 @@ export function providePam(): SafeProvider[] {
     safeProvider({
       provide: ITEM_DETAILS_BADGE,
       useValue: ItemDetailsStateBadgeComponent,
+    }),
+    // One per-row state read per list, shared by every option's count and the selection.
+    safeProvider({
+      provide: ControlledAccessVaultFilterService,
+      useClass: ControlledAccessVaultFilterService,
+      deps: [],
+    }),
+    safeProvider({
+      provide: VAULT_ITEM_FILTER,
+      useFactory: controlledAccessItemFilter,
+      deps: [I18nService, ControlledAccessVaultFilterService],
     }),
     safeProvider({
       provide: VAULT_ROW_ACCESS,
