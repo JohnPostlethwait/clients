@@ -1273,6 +1273,10 @@
     "message": "Ready to use",
     "description": "Badge on a vault item where access was approved and the user still has to start it."
   },
+  "pamAccessBadgeLessThanMinuteLeft": {
+    "message": "<1m left",
+    "description": "Badge for a vault item whose access ends in under a minute."
+  },
   "pamAccessBadgeTimeLeft": {
     "message": "$DURATION$ left",
     "description": "Badge counting down the access remaining on a vault item, for example '18m left'.",
@@ -9289,7 +9293,7 @@
     "message": "You can request access"
   },
   "pamUnlicensedBannerHeadingV2": {
-    "message": "You need a Privileged Controls license to use this item",
+    "message": "Privileged Controls license required to use item",
     "description": "Heading of the message shown on a privileged item to a member who has no Privileged Controls license. 'Privileged Controls' is a product name and should not be translated."
   },
   "pamUnlicensedBannerBodyV2": {

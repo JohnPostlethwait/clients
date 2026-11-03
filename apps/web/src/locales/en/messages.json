@@ -19215,7 +19215,7 @@
     "message": "You can request access"
   },
   "pamUnlicensedBannerHeadingV2": {
-    "message": "You need a Privileged Controls license to use this item",
+    "message": "Privileged Controls license required to use item",
     "description": "Heading of the message shown on a privileged item to a member who has no Privileged Controls license. 'Privileged Controls' is a product name and should not be translated."
   },
   "pamUnlicensedBannerBodyV2": {
