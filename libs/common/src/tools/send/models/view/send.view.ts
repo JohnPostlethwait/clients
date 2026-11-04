@@ -2,7 +2,7 @@
 // @ts-strict-ignore
 // eslint-disable-next-line no-restricted-imports
 import { SymmetricCryptoKey } from "@bitwarden/legacy-crypto";
-import { SendId as SdkSendId, SendView as SdkSendView } from "@bitwarden/sdk-internal";
+import { CipherId, SendId as SdkSendId, SendView as SdkSendView } from "@bitwarden/sdk-internal";
 
 import { View } from "../../../../models/view/view";
 import { asUuid, uuidAsString } from "../../../../platform/abstractions/sdk/sdk.service";
@@ -136,6 +136,17 @@ export class SendView implements View {
         this.type === SendType.Item
           ? {
               data: this.data?.data?.toSdkCipherView() ?? undefined,
+              metadata: {
+                // The SDK seals the item send with this id and restores `data.id` from it on
+                // decrypt, so it has to be the cipher's own id.
+                itemId: asUuid<CipherId>(this.data?.data?.id),
+                // Item-send metadata this client does not populate yet.
+                folderName: undefined,
+                collectionNames: undefined,
+                organizationName: undefined,
+                creationDate: undefined,
+                revisionDate: undefined,
+              },
             }
           : undefined,
       maxAccessCount: this.maxAccessCount ?? undefined,

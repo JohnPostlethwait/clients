@@ -76,7 +76,16 @@ export class SendAccessResponse extends BaseResponse {
           ? {
               encryptionVersion: obj.data?.encryptionVersion ?? undefined,
               data: obj.data?.data ?? undefined,
-              metadata: { itemId: asUuid(obj.data?.metadata?.itemId) },
+              metadata: {
+                itemId: asUuid(obj.data?.metadata?.itemId),
+                // The server sends these for the item-send metadata feature, which
+                // `SendItemMetadataApi` does not parse yet.
+                folderName: undefined,
+                collectionNames: undefined,
+                organizationName: undefined,
+                creationDate: undefined,
+                revisionDate: undefined,
+              },
             }
           : undefined,
     };

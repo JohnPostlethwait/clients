@@ -4,6 +4,7 @@ import { catchError, concatMap, firstValueFrom } from "rxjs";
 import { EncArrayBuffer } from "@bitwarden/legacy-crypto";
 import {
   AuthEdit,
+  CipherId,
   PasswordManagerClient,
   SendAddRequest,
   SendAuthType,
@@ -534,6 +535,17 @@ export class SendSdkApiService implements SendApiServiceAbstraction {
       return {
         Item: {
           data: sendView.data.data.toSdkCipherView(),
+          metadata: {
+            // The SDK seals the item send with this id and restores `data.id` from it on
+            // decrypt, so it has to be the cipher's own id.
+            itemId: asUuid<CipherId>(sendView.data.data.id),
+            // Item-send metadata this client does not populate yet.
+            folderName: undefined,
+            collectionNames: undefined,
+            organizationName: undefined,
+            creationDate: undefined,
+            revisionDate: undefined,
+          },
         },
       };
     }

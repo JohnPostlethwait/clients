@@ -50,7 +50,16 @@ export class SendItem extends Domain {
     return {
       encryptionVersion: this.encryptionVersion,
       data: this.data,
-      metadata: { itemId: asUuid(this.metadata.itemId) },
+      metadata: {
+        itemId: asUuid(this.metadata.itemId),
+        // The SDK carries these for the item-send metadata feature, which this client does not
+        // populate yet. `undefined` is what the SDK itself produced before the fields existed.
+        folderName: undefined,
+        collectionNames: undefined,
+        organizationName: undefined,
+        creationDate: undefined,
+        revisionDate: undefined,
+      },
     };
   }
 
